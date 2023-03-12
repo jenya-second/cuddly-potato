@@ -93,12 +93,12 @@ public:
 	void PressAlternativeShoot();
 	UFUNCTION(Server, Reliable)
 	void UnPressAlternativeShoot();
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastUpdateCameraView(FRotator rot);
 
 private:
 	TArray<FInputActionBinding> AcBind;
 	TArray<FInputAxisBinding> AxBind;
 
-
-	
 	
 };

@@ -40,6 +40,16 @@ void ADefaultCharacter::BeginPlay()
 void ADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (GetLocalRole() == ROLE_Authority) {
+		MulticastUpdateCameraView(Controller->GetControlRotation());
+	}
+}
+
+void ADefaultCharacter::MulticastUpdateCameraView_Implementation(FRotator rot)
+{
+	if (!Controller || GetLocalRole() == ROLE_Authority) {
+		this->Camera->SetWorldRotation(rot);
+	}
 }
 
 void ADefaultCharacter::MoveForward(float X)
@@ -197,8 +207,7 @@ void ADefaultCharacter::OnRep_CurrentHealth()
 	if (GetLocalRole() == ROLE_SimulatedProxy) {
 		if (CurrentHealth <= 0)
 		{
-			FString deathMessage = FString::Printf(TEXT("You have been killed."));
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+
 		}
 	}
 }
