@@ -22,7 +22,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "aa")
 	UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "aa")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "aa")
 	UWeaponManagerComponent* WeaponManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "aa")

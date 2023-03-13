@@ -17,7 +17,7 @@ void AMachineGun::PressShoot()
 			if (Actor != nullptr) {
 				Actor->BulletBody->SetPhysicsLinearVelocity(SpawnTransform.Rotator().Vector() *
 					Actor->Speed *
-					PlayerOwner->WeaponManager->CurrentWeapon->BulletSpeedScale);
+					BulletSpeedScale);
 				Actor->SetOwner(PlayerOwner);
 			}
 			CanFire = false;

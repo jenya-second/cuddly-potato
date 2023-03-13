@@ -21,7 +21,7 @@ ADefaultCharacter::ADefaultCharacter()
 	Camera->bUsePawnControlRotation = true;
 	WeaponManager = CreateDefaultSubobject<UWeaponManagerComponent>("WeaponManager");
 	BulletManager = CreateDefaultSubobject<UBulletManagerComponent>("BulletManager");
-	AimManager = CreateDefaultSubobject<UAimManagerComponent>("AimWeapon");
+	
 	Arms = CreateDefaultSubobject<USkeletalMeshComponent>("ArmsMesh");
 	Arms->SetupAttachment(RootComponent);
 	Arms->SetOnlyOwnerSee(true);
@@ -48,7 +48,8 @@ void ADefaultCharacter::Tick(float DeltaTime)
 void ADefaultCharacter::MulticastUpdateCameraView_Implementation(FRotator rot)
 {
 	if (!Controller || GetLocalRole() == ROLE_Authority) {
-		this->Camera->SetWorldRotation(rot);
+		FRotator ro = this->Camera->GetComponentRotation();
+		this->Camera->SetWorldRotation(FRotator(rot.Pitch, ro.Yaw, ro.Roll));
 	}
 }
 
@@ -84,30 +85,30 @@ void ADefaultCharacter::LookUp(float X)
 
 void ADefaultCharacter::PressShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
-		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->CurrentWeapon, &ADefaultWeapon::PressShoot, WeaponManager->CurrentWeapon->FireSpeed, true, 0);
+	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
+		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->FPPWeapons[WeaponManager->IndexWeapon], &ADefaultWeapon::PressShoot, WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->FireSpeed, true, 0);
 	}
 }
 
 void ADefaultCharacter::UnPressShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
+	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
 		GetWorldTimerManager().ClearTimer(ForShoot);
-		WeaponManager->CurrentWeapon->UnPressShoot();
+		WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->UnPressShoot();
 	}	
 }
 
 void ADefaultCharacter::PressAlternativeShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
-		WeaponManager->CurrentWeapon->PressAlternativeShoot();
+	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
+		WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->PressAlternativeShoot();
 	}	
 }
 
 void ADefaultCharacter::UnPressAlternativeShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
-		WeaponManager->CurrentWeapon->UnPressAlternativeShoot();
+	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
+		WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->UnPressAlternativeShoot();
 	}	
 }
 
@@ -124,9 +125,10 @@ void ADefaultCharacter::StopJump()
 void ADefaultCharacter::DestroyWeapons()
 {
 	if (WeaponManager != nullptr) {
-		for (int i = 0; i < WeaponManager->Weapons.Num(); i++) {
-			if (WeaponManager->Weapons.Num() > i) {
-				WeaponManager->Weapons[i]->Destroy();
+		for (int i = 0; i < WeaponManager->FPPWeapons.Num(); i++) {
+			if (WeaponManager->FPPWeapons.Num() > i) {
+				WeaponManager->FPPWeapons[i]->Destroy();
+				WeaponManager->TPPWeapons[i]->Destroy();
 			}
 		}
 	}
@@ -185,7 +187,7 @@ void ADefaultCharacter::OnDead_Implementation()
 void ADefaultCharacter::NextWeapon_Implementation()
 {
 	int32 a = WeaponManager->IndexWeapon + 1;
-	if (a == WeaponManager->Weapons.Num())
+	if (a == WeaponManager->WeaponsClasses.Num())
 	{
 		a = 0;
 	}
@@ -267,6 +269,9 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(NewController);
 	if (PC != nullptr) {
 		PC->SetModeGameOnly();
+	}
+	if (GetLocalRole() == ROLE_Authority) {
+		WeaponManager->SetCurrentWeapon(0);
 	}
 }
 

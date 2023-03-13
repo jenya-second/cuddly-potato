@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include <Components/CapsuleComponent.h>
 #include "DefaultWeapon.generated.h"
+
 
 UCLASS()
 class MULTIPLAYERGAME_API ADefaultWeapon : public AActor
@@ -18,8 +20,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 	int32 Ammo = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Ammo")
 	UStaticMeshComponent* WeaponBody;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Ammo")
+	UCapsuleComponent* CapsuleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 	float FireSpeed=1;

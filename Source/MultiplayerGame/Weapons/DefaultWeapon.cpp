@@ -8,9 +8,10 @@ ADefaultWeapon::ADefaultWeapon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
+	RootComponent = CapsuleComponent;
 	WeaponBody = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
-	RootComponent = WeaponBody;
+	WeaponBody->SetupAttachment(RootComponent);
 	WeaponBody->SetCollisionProfileName("OverlapAll");
 	WeaponBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

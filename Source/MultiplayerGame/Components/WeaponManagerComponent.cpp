@@ -1,4 +1,6 @@
 #include "WeaponManagerComponent.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 #include <MultiplayerGame/Other/DefaultCharacter.h>
 
 UWeaponManagerComponent::UWeaponManagerComponent()
@@ -11,35 +13,63 @@ UWeaponManagerComponent::UWeaponManagerComponent()
 void UWeaponManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	Weapons.Empty();
+	FPPWeapons.Empty();
+	TPPWeapons.Empty();
 	for (int i = 0; i < WeaponsClasses.Num(); i++)
 	{
-		const FTransform* SpawnTransform = &GetOwner()->GetActorTransform();
-		// UE_LOG(LogTemp,Warning,TEXT("Spawned"));
-		Weapons.Add(Cast<ADefaultWeapon>(GetWorld()->SpawnActor(WeaponsClasses[i], SpawnTransform)));
-		Weapons[i]->SetActorHiddenInGame(true);
-		Weapons[i]->SetOwner(GetOwner());
+		FTransform SpawnTransform = Cast<ADefaultCharacter>(GetOwner())->Camera->GetComponentTransform();
+		FPPWeapons.Add(Cast<ADefaultWeapon>(GetWorld()->SpawnActor(WeaponsClasses[i],&SpawnTransform)));
+		FPPWeapons[i]->SetActorHiddenInGame(true);
+		FPPWeapons[i]->SetOwner(GetOwner());
+		TPPWeapons.Add(Cast<ADefaultWeapon>(GetWorld()->SpawnActor(WeaponsClasses[i], &SpawnTransform)));
+		TPPWeapons[i]->SetActorHiddenInGame(true);
+		TPPWeapons[i]->SetOwner(GetOwner());
 		ADefaultCharacter* Ch = Cast<ADefaultCharacter>(GetOwner());
 		if (Ch != nullptr) {
-			Weapons[i]->AttachToComponent(Ch->Arms, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Right_arm");
+			if (Ch->GetLocalRole() == ROLE_Authority) {
+				FPPWeapons[i]->AttachToComponent(Ch->Camera, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			}
+			else{
+				FPPWeapons[i]->AttachToComponent(Ch->Arms, FAttachmentTransformRules::SnapToTargetNotIncludingScale,"Right_arm");
+			}
+			TPPWeapons[i]->AttachToComponent(Ch->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "Right_arm");
 		}
 	}
-	SetCurrentWeapon(0);
 }
 
-void UWeaponManagerComponent::SetCurrentWeapon_Implementation(int32 Index)
+void UWeaponManagerComponent::SetCurrentWeapon(int32 Index)
 {
-	if (Index >= 0 && Index < Weapons.Num())
+	if (Index >= 0 && Index < WeaponsClasses.Num())
 	{
-		if (CurrentWeapon != nullptr)
-		{
-			CurrentWeapon->SetActorHiddenInGame(true);
-		}
-		CurrentWeapon = Weapons[Index];
-		CurrentWeapon->SetActorHiddenInGame(false);
-		IndexWeapon = Index;
+		MulticastSetCurrentWeapon(Index);
 	}
+}
 
+void UWeaponManagerComponent::MulticastSetCurrentWeapon_Implementation(int32 Index)
+{
+	ADefaultCharacter* ch = Cast<ADefaultCharacter>(GetOwner());
+	if (!ch) {
+		return;
+	}
+	if (FPPWeapons[IndexWeapon]){
+		FPPWeapons[IndexWeapon]->SetActorHiddenInGame(true);
+	}
+	if (TPPWeapons[IndexWeapon]) {
+		TPPWeapons[IndexWeapon]->SetActorHiddenInGame(true);
+	}
+	IndexWeapon = Index;
+	if (UGameplayStatics::GetPlayerPawn(GetWorld(),0) == GetOwner() || ch->Controller) {
+		if (FPPWeapons[IndexWeapon]) {
+			FPPWeapons[IndexWeapon]->SetActorHiddenInGame(false);
+		}
+		
+	}
+	else {
+		if (TPPWeapons[IndexWeapon]) {
+			TPPWeapons[IndexWeapon]->SetActorHiddenInGame(false);
+		}
+		
+	}
 }
 
 void UWeaponManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -50,6 +80,6 @@ void UWeaponManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType
 void UWeaponManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UWeaponManagerComponent,CurrentWeapon);
+	DOREPLIFETIME(UWeaponManagerComponent, IndexWeapon);
 }
 
