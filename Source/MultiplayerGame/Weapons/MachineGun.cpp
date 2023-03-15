@@ -15,9 +15,8 @@ void AMachineGun::PressShoot()
 			const FTransform SpawnTransform = WeaponBody->GetSocketTransform("For_bullet");
 			ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActor(PlayerOwner->BulletManager->CurrentBullet, &SpawnTransform));
 			if (Actor != nullptr) {
-				Actor->BulletBody->SetPhysicsLinearVelocity(SpawnTransform.Rotator().Vector() *
-					Actor->Speed *
-					BulletSpeedScale);
+				Actor->ProjectileComponent->Velocity = SpawnTransform.Rotator().Vector() * 
+					Actor->Speed * BulletSpeedScale;
 				Actor->SetOwner(PlayerOwner);
 			}
 			CanFire = false;

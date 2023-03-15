@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "DefaultBullet.generated.h"
-
 
 UCLASS()
 class MULTIPLAYERGAME_API ADefaultBullet : public AActor
@@ -22,6 +22,8 @@ public:
 	float Speed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
 	UStaticMeshComponent* BulletBody;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
+	UProjectileMovementComponent* ProjectileComponent;
 
 protected:
 	virtual void BeginPlay() override;

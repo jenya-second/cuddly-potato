@@ -11,6 +11,9 @@ ADefaultBullet::ADefaultBullet()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetReplicateMovement(true);
+	ProjectileComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
+	ProjectileComponent->SetIsReplicated(true);
+	ProjectileComponent->bForceSubStepping = true;
 	BulletBody = CreateDefaultSubobject<UStaticMeshComponent>("BulletMesh");
 	RootComponent = BulletBody;
 	BulletBody->SetGenerateOverlapEvents(true);
