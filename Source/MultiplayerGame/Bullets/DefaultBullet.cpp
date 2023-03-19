@@ -20,10 +20,9 @@ ADefaultBullet::ADefaultBullet()
 	BulletBody->SetCollisionProfileName("OverlapAll");
 	BulletBody->SetEnableGravity(false);
 	BulletBody->SetNotifyRigidBodyCollision(true);
-	BulletBody->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	BulletBody->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	BulletBody->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BulletBody->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	BulletBody->SetCollisionResponseToChannel(ECollisionChannel::ECC_Vehicle, ECollisionResponse::ECR_Ignore);
-	BulletBody->SetSimulatePhysics(true);
 }
 
 void ADefaultBullet::BeginPlay()
@@ -34,16 +33,27 @@ void ADefaultBullet::BeginPlay()
 void ADefaultBullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	
+}
+
+void ADefaultBullet::NotifyActorBeginOverlap(AActor* Actor)
+{
+	Super::NotifyActorBeginOverlap(Actor);
+	DoDamage(Actor);
+	Destroy();
+}
+
+void ADefaultBullet::DoDamage(AActor* Actor)
+{
 	AMatchGameMode* GM = Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode());
 	if (GetLocalRole() == ROLE_Authority) {
-		ADefaultCharacter* Ch = Cast<ADefaultCharacter>(Other);
+		ADefaultCharacter* Ch = Cast<ADefaultCharacter>(Actor);
 		if (Ch != nullptr) {
 			APlayerState* PS = Cast<ADefaultCharacter>(GetOwner())->GetPlayerState();
 			if (GM->CanDamage(Ch->GetPlayerState(), PS)) {
 				GM->ApplyDamageToCh(Ch, Cast<ACharacter>(GetOwner()), Damage);
 			}
 		}
-		Destroy();
 	}
 }
 

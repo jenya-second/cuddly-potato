@@ -42,7 +42,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
+	UFUNCTION(NetMulticast,Unreliable)
+	virtual void MulticastSpawnBullet(FTransform SpawnTransform);
 
 	virtual void PressShoot();
 	virtual void UnPressShoot();

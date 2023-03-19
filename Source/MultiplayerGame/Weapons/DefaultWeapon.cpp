@@ -30,6 +30,11 @@ void ADefaultWeapon::Tick(float DeltaTime)
 
 }
 
+void ADefaultWeapon::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Spawn bullet multicast"));
+}
+
 void ADefaultWeapon::PressShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Shoot"));

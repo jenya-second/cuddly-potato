@@ -85,30 +85,42 @@ void ADefaultCharacter::LookUp(float X)
 
 void ADefaultCharacter::PressShoot_Implementation()
 {
-	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
-		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->FPPWeapons[WeaponManager->IndexWeapon], &ADefaultWeapon::PressShoot, WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->FireSpeed, true, 0);
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
+		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->Weapons[WeaponManager->IndexWeapon], &ADefaultWeapon::PressShoot, WeaponManager->Weapons[WeaponManager->IndexWeapon]->FireSpeed, true, 0);
 	}
 }
 
 void ADefaultCharacter::UnPressShoot_Implementation()
 {
-	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
 		GetWorldTimerManager().ClearTimer(ForShoot);
-		WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->UnPressShoot();
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->UnPressShoot();
 	}	
 }
 
 void ADefaultCharacter::PressAlternativeShoot_Implementation()
 {
-	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
-		WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->PressAlternativeShoot();
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->PressAlternativeShoot();
 	}	
 }
 
 void ADefaultCharacter::UnPressAlternativeShoot_Implementation()
 {
-	if (WeaponManager->FPPWeapons[WeaponManager->IndexWeapon] != nullptr) {
-		WeaponManager->FPPWeapons[WeaponManager->IndexWeapon]->UnPressAlternativeShoot();
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->UnPressAlternativeShoot();
 	}	
 }
 
@@ -125,10 +137,9 @@ void ADefaultCharacter::StopJump()
 void ADefaultCharacter::DestroyWeapons()
 {
 	if (WeaponManager != nullptr) {
-		for (int i = 0; i < WeaponManager->FPPWeapons.Num(); i++) {
-			if (WeaponManager->FPPWeapons.Num() > i) {
-				WeaponManager->FPPWeapons[i]->Destroy();
-				WeaponManager->TPPWeapons[i]->Destroy();
+		for (int i = 0; i < WeaponManager->Weapons.Num(); i++) {
+			if (WeaponManager->Weapons[0]) {
+				WeaponManager->Weapons[0]->Destroy();
 			}
 		}
 	}
@@ -270,7 +281,9 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 	if (PC != nullptr) {
 		PC->SetModeGameOnly();
 	}
+	WeaponManager->NetSetWeapon();
 	if (GetLocalRole() == ROLE_Authority) {
+		
 		WeaponManager->SetCurrentWeapon(0);
 	}
 }
@@ -278,9 +291,15 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 void ADefaultCharacter::SetMat(FColor Col)
 {
 	TArray<UMaterialInterface*> Mat = GetMesh()->GetMaterials();
+	TArray<UMaterialInterface*> AMat = Arms->GetMaterials();
 	for (int i = 0; i < Mat.Num(); i++) {
 		UMaterialInstanceDynamic* NewMat = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, Mat[i]);
 		NewMat->SetVectorParameterValue(FName("Color"), Col);
 		GetMesh()->SetMaterialByName(GetMesh()->GetMaterialSlotNames()[i], NewMat);
+	}
+	for (int i = 0; i < AMat.Num(); i++) {
+		UMaterialInstanceDynamic* ANewMat = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, AMat[i]);
+		ANewMat->SetVectorParameterValue(FName("Color"), Col);
+		Arms->SetMaterialByName(Arms->GetMaterialSlotNames()[i], ANewMat);
 	}
 }

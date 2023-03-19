@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include <MultiplayerGame/Weapons/DefaultWeapon.h>
 #include "Net/UnrealNetwork.h"
-
 #include "WeaponManagerComponent.generated.h"
 
 
@@ -17,23 +16,17 @@ class MULTIPLAYERGAME_API UWeaponManagerComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UWeaponManagerComponent();
 
-	/*UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	ADefaultWeapon* FPPCurrentWeapon;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	ADefaultWeapon* TPPCurrentWeapon;*/
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	int32 IndexWeapon = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<ADefaultWeapon*> FPPWeapons;
+	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	ADefaultWeapon* CurrentWeapon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	TArray<ADefaultWeapon*> TPPWeapons;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TArray<ADefaultWeapon*> Weapons;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<TSubclassOf<ADefaultWeapon>> WeaponsClasses;
@@ -43,6 +36,15 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSetCurrentWeapon(int32 Index);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ClientSetCurrentWeapon(ADefaultWeapon* CurWeapon);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetSetWeapon();
+
+	UFUNCTION()
+	void NetSetCurrentWeapon(int Index);
 
 protected:
 	// Called when the game starts

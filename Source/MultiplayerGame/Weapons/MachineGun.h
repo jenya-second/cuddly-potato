@@ -22,6 +22,7 @@ public:
 	virtual void UnPressAlternativeShoot() override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void MulticastSpawnBullet(FTransform SpawnTransform) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MashineGun")
 	float MaxCharge = 20;
