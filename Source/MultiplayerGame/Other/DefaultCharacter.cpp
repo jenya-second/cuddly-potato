@@ -55,7 +55,6 @@ void ADefaultCharacter::MulticastUpdateCameraView_Implementation(FRotator rot)
 
 void ADefaultCharacter::MoveForward(float X)
 {
-
 	FRotator rot = FRotator(0.0, GetControlRotation().Yaw, 0.0);
 	FVector Vector = rot.Vector();
 	AddMovementInput(Vector, X);
@@ -190,7 +189,10 @@ void ADefaultCharacter::OnStatsPressed()
 
 void ADefaultCharacter::OnDead_Implementation()
 {
-	DisableInput(Cast<APlayerController>(Controller));
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	if (PC) {
+		DisableInput(PC);
+	}
 	GetMesh()->SetAllBodiesSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

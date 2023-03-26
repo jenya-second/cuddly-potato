@@ -63,7 +63,8 @@ void AMatchGameState::OnRep_MatchInProgress()
 
 void AMatchGameState::OnRep_Teams()
 {
-	Cast<ADefaultPlayerController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0))->WarmUp->UpdateTeams();
+	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
+	PC->WarmUp->UpdateTeams();
 }
 
 void AMatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

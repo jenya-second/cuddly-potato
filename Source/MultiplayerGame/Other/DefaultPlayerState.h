@@ -42,6 +42,9 @@ public:
 
 	void CleanStats();
 
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ChangeTeam(ADefaultTeam* NewTeam);
+
 	FTimerHandle ForRespawn;
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

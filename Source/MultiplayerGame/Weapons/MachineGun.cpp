@@ -32,14 +32,13 @@ void AMachineGun::PressAlternativeShoot()
 
 }
 
-void AMachineGun::MulticastSpawnBullet(FTransform SpawnTransform)
+void AMachineGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
 {
-	
 	ADefaultCharacter* PlayerOwner = Cast<ADefaultCharacter>(GetOwner());
 	if (PlayerOwner != nullptr) {
 		ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActor(PlayerOwner->BulletManager->CurrentBullet, &SpawnTransform));
 		if (Actor != nullptr) {
-			Super::MulticastSpawnBullet(SpawnTransform);
+			
 			Actor->ProjectileComponent->Velocity = SpawnTransform.Rotator().Vector() *
 				Actor->Speed * BulletSpeedScale;
 			Actor->SetOwner(PlayerOwner);

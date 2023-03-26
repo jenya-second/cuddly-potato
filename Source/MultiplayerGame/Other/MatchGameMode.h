@@ -25,7 +25,11 @@ public:
 
 	bool IsReadyToStartGame();
 
+	UFUNCTION(BlueprintCallable)
 	void ChangeTeam(APlayerState* PS, int32 TeamIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeTeamByTeam(APlayerState* PS, ADefaultTeam* Team);
 
 	int32 FindBetterTeam(APlayerState* PS);
 
@@ -37,7 +41,7 @@ public:
 
 	void RedistributeByTeam();
 	UFUNCTION()
-	void OnRestart(ADefaultPlayerController* PC);
+	void OnRestart(AController* C);
 
 	virtual void BeginPlay() override;
 

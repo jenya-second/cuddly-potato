@@ -9,10 +9,6 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "DefaultPlayerController.h"
 
-//AMatchGameMode::AMatchGameMode(const FObjectInitializer& ObjectInitializer)
-//{
-//	PlayerControllerClass= APlayerController::StaticClass();
-//}
 
 void AMatchGameMode::BeginPlay()
 {
@@ -44,19 +40,25 @@ void AMatchGameMode::EndGame()
 		GS()->MatchInProgress = false;
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
 			GetWorldTimerManager().ClearTimer(Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->ForRespawn);
-			ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(GS()->PlayerArray[i]->GetOwner());
+			AController* PC = Cast<AController>(GS()->PlayerArray[i]->GetOwner());
 			PC->GetPawn()->Destroy();
-			/*RestartPlayer(Cast<ADefaultPlayerController>(GS()->PlayerArray[i]->GetOwner()));*/
-			PC->OnEndGame();
+			ADefaultPlayerController* DPC = Cast<ADefaultPlayerController>(PC);
+			if (DPC) {
+				DPC->OnEndGame();
+			}
 		}
 	}
 }
 
-void AMatchGameMode::OnRestart(ADefaultPlayerController* PC)
+void AMatchGameMode::OnRestart(AController* C)
 {
-	if (PC != nullptr) {
-		RestartPlayer(PC);
-		PC->OnRestart();
+	if (C != nullptr) {
+		RestartPlayer(C);
+		ADefaultPlayerController* DPC = Cast<ADefaultPlayerController>(C);
+		if (DPC != nullptr) {
+			DPC->OnRestart();
+		}
+		
 	}
 }
 
@@ -90,15 +92,24 @@ AMatchGameState* AMatchGameMode::GS()
 void AMatchGameMode::ChangeTeam(APlayerState* PS, int32 TeamIndex)
 {
 	ADefaultPlayerState* DPS = Cast<ADefaultPlayerState>(PS);
-	if (TeamIndex == -1 || DPS==nullptr) {
+	if (TeamIndex == -1 || DPS == nullptr) {
+		return;
+	}
+	ChangeTeamByTeam(PS, GS()->Teams[TeamIndex]);
+}
+
+void AMatchGameMode::ChangeTeamByTeam(APlayerState* PS, ADefaultTeam* Team)
+{
+	ADefaultPlayerState* DPS = Cast<ADefaultPlayerState>(PS);
+	if (DPS == nullptr) {
 		return;
 	}
 	else {
-		if (DPS->Team!=nullptr) {
+		if (DPS->Team != nullptr) {
 			DPS->Team->TeamArray.Remove(DPS);
 		}
-		GS()->Teams[TeamIndex]->TeamArray.Add(DPS);
-		DPS->Team = GS()->Teams[TeamIndex];
+		Team->TeamArray.Add(DPS);
+		DPS->Team = Team;
 	}
 }
 
@@ -219,10 +230,13 @@ void AMatchGameMode::OnDead(ACharacter* Ch, ACharacter* Ins)
 			DCh->OnDead();
 			DCh->DestroyWeapons();
 			FTimerDelegate del;
-			ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(DCh->GetOwner());
-			if (PC != nullptr) {
-				PC->OnDead();
-				del.BindUFunction(this, FName("OnRestart"), PC);
+			AController* C = Cast<AController>(DCh->GetOwner());
+			if (C != nullptr) {
+				ADefaultPlayerController* DPC = Cast<ADefaultPlayerController>(C);
+				if (DPC != nullptr) {
+					DPC->OnDead();
+				}
+				del.BindUFunction(this, FName("OnRestart"), C);
 			}
 			GetWorldTimerManager().SetTimer(B->ForRespawn,del,GS()->RestartTime, false);
 		}

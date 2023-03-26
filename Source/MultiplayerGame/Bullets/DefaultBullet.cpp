@@ -39,7 +39,10 @@ void ADefaultBullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrim
 void ADefaultBullet::NotifyActorBeginOverlap(AActor* Actor)
 {
 	Super::NotifyActorBeginOverlap(Actor);
-	DoDamage(Actor);
+	
+	if (GetWorld()->GetAuthGameMode()) {
+		DoDamage(Actor);
+	}
 	Destroy();
 }
 
