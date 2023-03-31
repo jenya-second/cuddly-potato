@@ -65,4 +65,8 @@ public:
 	void ChangeMaxKills(int32 newInt);
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ChangeTime(float NewTime);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void AddBotToTeam(ADefaultTeam* Team);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void RemoveBotFromTeam(ADefaultTeam* Team);
 };

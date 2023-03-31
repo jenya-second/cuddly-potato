@@ -8,6 +8,7 @@
 #include <MultiplayerGame/Other/DefaultCharacter.h>
 #include "GameFramework/SpectatorPawn.h"
 #include "DefaultPlayerController.h"
+#include "AIController.h"
 
 
 void AMatchGameMode::BeginPlay()
@@ -96,6 +97,36 @@ void AMatchGameMode::ChangeTeam(APlayerState* PS, int32 TeamIndex)
 		return;
 	}
 	ChangeTeamByTeam(PS, GS()->Teams[TeamIndex]);
+}
+
+void AMatchGameMode::AddBotToTeam(ADefaultTeam* Team)
+{
+	AAIController* AIC = Cast<AAIController>(GetWorld()->SpawnActor(AIControllerClass));
+	if (AIC == nullptr) {
+		return;
+	}
+	const FTransform tr;
+	FActorSpawnParameters par = FActorSpawnParameters();
+	par.Owner = AIC;
+	ADefaultPlayerState* PS = Cast<ADefaultPlayerState>(GetWorld()->SpawnActor(PlayerStateClass, &tr, par));
+	if (PS != nullptr) {
+		AIC->PlayerState = PS;
+		ChangeTeamByTeam(PS, Team);
+		PS->isReady = true;
+		PS->SetPlayerName(FString("Bot"));
+	}
+	
+}
+
+void AMatchGameMode::RemoveBotFromTeam(ADefaultTeam* Team)
+{
+	for (int i = 0; i < Team->TeamArray.Num(); i++) {
+		AAIController* AIC = Cast<AAIController>(Team->TeamArray[i]->GetOwner());
+		if (AIC != nullptr) {
+			AIC->Destroy();
+			
+		}
+	}
 }
 
 void AMatchGameMode::ChangeTeamByTeam(APlayerState* PS, ADefaultTeam* Team)
@@ -288,7 +319,13 @@ void AMatchGameMode::RestartPlayer(AController* Controller)
 {
 	AActor* PlayerStart = FindPlayerStart(Controller);
 	if (PlayerStart != nullptr) {
-		APawn* NewPawn = Cast<APawn>(GetWorld()->SpawnActor(DefaultPawnClass, &PlayerStart->GetTransform()));
+		APawn* NewPawn;
+		if (Cast<AAIController>(Controller) != nullptr) {
+			NewPawn = Cast<APawn>(GetWorld()->SpawnActor(AICharacterClass, &PlayerStart->GetTransform()));
+		}
+		else {
+			NewPawn = Cast<APawn>(GetWorld()->SpawnActor(DefaultPawnClass, &PlayerStart->GetTransform()));
+		}
 		if (NewPawn != nullptr) {
 			APawn* A = Controller->GetPawn();
 			Controller->Possess(NewPawn);

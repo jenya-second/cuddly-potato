@@ -277,6 +277,12 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	ADefaultPlayerState* PS = Cast<ADefaultPlayerState>(GetController()->PlayerState);
+	if (PS == nullptr) {
+		return;
+	}
+	if (PS->Team == nullptr) {
+		return;
+	}
 	PS->isDamageble = true;
 	Color = PS->Team->TeamColor;
 	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(NewController);

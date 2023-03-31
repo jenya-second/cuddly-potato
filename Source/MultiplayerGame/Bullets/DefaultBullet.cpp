@@ -9,8 +9,7 @@
 ADefaultBullet::ADefaultBullet()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
-	SetReplicateMovement(true);
+	
 	ProjectileComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
 	ProjectileComponent->SetIsReplicated(true);
 	ProjectileComponent->bForceSubStepping = true;
@@ -48,14 +47,15 @@ void ADefaultBullet::NotifyActorBeginOverlap(AActor* Actor)
 
 void ADefaultBullet::DoDamage(AActor* Actor)
 {
-	AMatchGameMode* GM = Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode());
-	if (GetLocalRole() == ROLE_Authority) {
-		ADefaultCharacter* Ch = Cast<ADefaultCharacter>(Actor);
-		if (Ch != nullptr) {
-			APlayerState* PS = Cast<ADefaultCharacter>(GetOwner())->GetPlayerState();
-			if (GM->CanDamage(Ch->GetPlayerState(), PS)) {
-				GM->ApplyDamageToCh(Ch, Cast<ACharacter>(GetOwner()), Damage);
-			}
+	AMatchGameMode* GM = Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode()); 
+	if (GetOwner() == nullptr) {
+		return;
+	}
+	ADefaultCharacter* Ch = Cast<ADefaultCharacter>(Actor);
+	if (Ch != nullptr) {
+		APlayerState* PS = Cast<ADefaultCharacter>(GetOwner())->GetPlayerState();
+		if (GM->CanDamage(Ch->GetPlayerState(), PS)) {
+			GM->ApplyDamageToCh(Ch, Cast<ACharacter>(GetOwner()), Damage);
 		}
 	}
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include <MultiplayerGame/Bullets/DefaultBullet.h>
+#include "Net/UnrealNetwork.h"
 #include "BulletManagerComponent.generated.h"
 
 
@@ -18,7 +19,7 @@ public:
 	// Sets default values for this component's properties
 	UBulletManagerComponent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Bullets")
 	TSubclassOf<ADefaultBullet> CurrentBullet;
 
 	int32 IndexBullet = 0;
@@ -38,6 +39,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 		
 };

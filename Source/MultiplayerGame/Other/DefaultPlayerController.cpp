@@ -136,3 +136,13 @@ void ADefaultPlayerController::ChangeTime_Implementation(float NewTime)
 		Cast<AMatchGameState>(GetWorld()->GetGameState())->Time = NewTime;
 	}
 }
+
+void ADefaultPlayerController::AddBotToTeam_Implementation(ADefaultTeam* Team)
+{
+	Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->AddBotToTeam(Team);
+}
+
+void ADefaultPlayerController::RemoveBotFromTeam_Implementation(ADefaultTeam* Team)
+{
+	Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->RemoveBotFromTeam(Team);
+}

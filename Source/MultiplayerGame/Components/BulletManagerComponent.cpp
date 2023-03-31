@@ -3,6 +3,7 @@
 UBulletManagerComponent::UBulletManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
 }
 
 void UBulletManagerComponent::BeginPlay()
@@ -34,5 +35,11 @@ void UBulletManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UBulletManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UBulletManagerComponent, CurrentBullet);
 }
 
