@@ -270,6 +270,10 @@ void ADefaultCharacter::Destroyed()
 
 void ADefaultCharacter::UnPossessed()
 {
+	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(Controller);
+	if (PC != nullptr) {
+		PC->OnUnPos();
+	}
 	Super::UnPossessed();
 }
 
@@ -288,12 +292,14 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(NewController);
 	if (PC != nullptr) {
 		PC->SetModeGameOnly();
+		PC->OnPos();
 	}
 	WeaponManager->NetSetWeapon();
 	if (GetLocalRole() == ROLE_Authority) {
 		
 		WeaponManager->SetCurrentWeapon(0);
 	}
+	
 }
 
 void ADefaultCharacter::SetMat(FColor Col)

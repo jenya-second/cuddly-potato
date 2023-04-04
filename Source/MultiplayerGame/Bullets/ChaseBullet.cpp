@@ -19,7 +19,7 @@ void AChaseBullet::Tick(float DeltaTime)
 	FCollisionObjectQueryParams Obj;
 	Obj.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
 	if (GetWorld()->SweepSingleByObjectType(res, GetActorLocation(), GetActorLocation(), FQuat(), Obj, FCollisionShape::MakeSphere(Radius), Params)) {
-		FVector v1 = res.Actor->GetActorLocation() - GetActorLocation();
+		FVector v1 = res.Actor->GetActorLocation() - FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z-50);
 		FVector v2 = ProjectileComponent->Velocity;
 		FVector XYZ = v2 ^ v1;
 		

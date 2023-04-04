@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -28,6 +26,8 @@ public:
 	TSubclassOf<UPauseMenuWidget> PauseMenuClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Controller")
 	TSubclassOf<UWarmUpWidget> WarmUpClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Controller")
+	TSubclassOf<UUserWidget> CharacterWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
 	UMatchInfo* MatchStats;
@@ -35,6 +35,8 @@ public:
 	UPauseMenuWidget* PauseMenu;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
 	UWarmUpWidget* WarmUp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller")
+	UUserWidget* CharacterWidget;
 
 	UFUNCTION(Client, Reliable)
 	void RefreshUI();
@@ -50,6 +52,10 @@ public:
 	void OnFocusMenu();
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void OnUnFocusMenu();
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void OnPos();
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void OnUnPos();
 	
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ChangeRestartTime(float NewTime);

@@ -10,9 +10,11 @@ ADefaultWeapon::ADefaultWeapon()
 	PrimaryActorTick.bCanEverTick = true;
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
 	RootComponent = CapsuleComponent;
+	CapsuleComponent->SetGenerateOverlapEvents(false);
 	WeaponBody = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
 	WeaponBody->SetupAttachment(RootComponent);
-	WeaponBody->SetCollisionProfileName("OverlapAll");
+	WeaponBody->SetCollisionProfileName("NoCollision");
+	WeaponBody->SetGenerateOverlapEvents(false);
 	WeaponBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

@@ -20,8 +20,9 @@ ADefaultBullet::ADefaultBullet()
 	BulletBody->SetEnableGravity(false);
 	BulletBody->SetNotifyRigidBodyCollision(true);
 	BulletBody->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BulletBody->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 	BulletBody->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	BulletBody->SetCollisionResponseToChannel(ECollisionChannel::ECC_Vehicle, ECollisionResponse::ECR_Ignore);
+	BulletBody->SetCollisionResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Ignore);
 }
 
 void ADefaultBullet::BeginPlay()
@@ -38,7 +39,9 @@ void ADefaultBullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrim
 void ADefaultBullet::NotifyActorBeginOverlap(AActor* Actor)
 {
 	Super::NotifyActorBeginOverlap(Actor);
-	
+	if (Actor == GetOwner()) {
+		return;
+	}
 	if (GetWorld()->GetAuthGameMode()) {
 		DoDamage(Actor);
 	}
