@@ -35,6 +35,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 	float BulletDamageScale=1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	bool bIsAutomatic = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	float LinearDamp;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

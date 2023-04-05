@@ -66,4 +66,9 @@ void ADefaultBullet::DoDamage(AActor* Actor)
 void ADefaultBullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (LinearDamping == 0) {
+		return;
+	}
+	FVector damp = ProjectileComponent->Velocity*LinearDamping;
+	ProjectileComponent->Velocity = ProjectileComponent->Velocity - damp*DeltaTime;
 }

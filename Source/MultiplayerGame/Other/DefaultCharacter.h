@@ -46,6 +46,12 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "aa")
 	float Shield = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	bool bShootPressed = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	bool bAltShootPressed = false;
+
 	UFUNCTION()
 	void OnRep_CurrentHealth();
 	UFUNCTION()

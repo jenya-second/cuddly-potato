@@ -29,7 +29,7 @@ void AMachineGun::PressShoot()
 
 void AMachineGun::PressAlternativeShoot()
 {
-
+	
 }
 
 void AMachineGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
@@ -38,12 +38,16 @@ void AMachineGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
 	if (PlayerOwner != nullptr) {
 		FActorSpawnParameters par = FActorSpawnParameters();
 		par.Owner = PlayerOwner;
-		ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActor(PlayerOwner->BulletManager->CurrentBullet, &SpawnTransform, par));
+		ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActorDeferred<ADefaultBullet>(PlayerOwner->BulletManager->CurrentBullet, SpawnTransform, PlayerOwner));
 		if (Actor != nullptr) {
+			
+			Actor->Damage *= BulletDamageScale;
+			Actor->LinearDamping = LinearDamp;
+			Actor->FinishSpawning(SpawnTransform);
 			Actor->ProjectileComponent->Velocity = SpawnTransform.Rotator().Vector() *
 				Actor->Speed * BulletSpeedScale;
 		}
-	}	
+	}
 }
 
 void AMachineGun::SetCanFireTrue()
@@ -53,12 +57,12 @@ void AMachineGun::SetCanFireTrue()
 
 void AMachineGun::UnPressShoot()
 {
-
+	
 }
 
 void AMachineGun::UnPressAlternativeShoot()
 {
-
+	
 }
 
 void AMachineGun::BeginPlay()

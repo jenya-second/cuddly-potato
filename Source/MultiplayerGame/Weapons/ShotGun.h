@@ -14,4 +14,18 @@ class MULTIPLAYERGAME_API AShotGun : public ADefaultWeapon
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShotGun")
+	bool CanFire = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShotGun")
+	float Angle;
+	
+	virtual void PressShoot() override;
+	virtual void PressAlternativeShoot() override;
+	void SetCanFireTrue();
+	virtual void UnPressShoot() override;
+	virtual void UnPressAlternativeShoot() override;
+	virtual void MulticastSpawnBullet_Implementation(FTransform SpawnTransform) override;
+
+	FTimerHandle ResetHandle;
 };

@@ -84,27 +84,33 @@ void ADefaultCharacter::LookUp(float X)
 
 void ADefaultCharacter::PressShoot_Implementation()
 {
+	bShootPressed = true;
 	if (WeaponManager->Weapons.Num() == 0) {
 		return;
 	}
-	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr && WeaponManager->Weapons[WeaponManager->IndexWeapon]->bIsAutomatic) {
 		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->Weapons[WeaponManager->IndexWeapon], &ADefaultWeapon::PressShoot, WeaponManager->Weapons[WeaponManager->IndexWeapon]->FireSpeed, true, 0);
+	}
+	else {
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->PressShoot();
 	}
 }
 
 void ADefaultCharacter::UnPressShoot_Implementation()
 {
+	bShootPressed = false;
 	if (WeaponManager->Weapons.Num() == 0) {
 		return;
 	}
 	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
 		GetWorldTimerManager().ClearTimer(ForShoot);
 		WeaponManager->Weapons[WeaponManager->IndexWeapon]->UnPressShoot();
-	}	
+	}
 }
 
 void ADefaultCharacter::PressAlternativeShoot_Implementation()
 {
+	bAltShootPressed = true;
 	if (WeaponManager->Weapons.Num() == 0) {
 		return;
 	}
@@ -115,6 +121,7 @@ void ADefaultCharacter::PressAlternativeShoot_Implementation()
 
 void ADefaultCharacter::UnPressAlternativeShoot_Implementation()
 {
+	bAltShootPressed = false;
 	if (WeaponManager->Weapons.Num() == 0) {
 		return;
 	}
@@ -136,9 +143,10 @@ void ADefaultCharacter::StopJump()
 void ADefaultCharacter::DestroyWeapons()
 {
 	if (WeaponManager != nullptr) {
-		for (int i = 0; i < WeaponManager->Weapons.Num(); i++) {
-			if (WeaponManager->Weapons[0]) {
-				WeaponManager->Weapons[0]->Destroy();
+		int a = WeaponManager->Weapons.Num();
+		for (int i = 0; i < a; i++) {
+			if (WeaponManager->Weapons[i]) {
+				WeaponManager->Weapons[i]->Destroy();
 			}
 		}
 	}
@@ -199,12 +207,19 @@ void ADefaultCharacter::OnDead_Implementation()
 
 void ADefaultCharacter::NextWeapon_Implementation()
 {
+	if (bShootPressed) {
+		UnPressShoot();
+		bShootPressed = true;
+	}
 	int32 a = WeaponManager->IndexWeapon + 1;
 	if (a == WeaponManager->WeaponsClasses.Num())
 	{
 		a = 0;
 	}
 	WeaponManager->SetCurrentWeapon(a);
+	if (bShootPressed) {
+		PressShoot();
+	}
 }
 
 void ADefaultCharacter::NextBullet_Implementation()

@@ -17,9 +17,11 @@ public:
 	ADefaultBullet();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
-	int32 Damage;
+	float Damage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
 	float Speed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
+	float LinearDamping;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
 	UStaticMeshComponent* BulletBody;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
