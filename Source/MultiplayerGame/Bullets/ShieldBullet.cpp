@@ -15,6 +15,7 @@ void AShieldBullet::DoDamage(AActor* Actor)
 	ADefaultCharacter* ACh = Cast<ADefaultCharacter>(Actor);
 	ADefaultCharacter* Ch = Cast<ADefaultCharacter>(GetOwner());
 	if (Ch != nullptr && ACh != nullptr) {
+		float ShieldIncrease = Damage * ShieldKoef;
 		if (Ch->Shield + ShieldIncrease > 100) {
 			Ch->Shield = 100;
 		}

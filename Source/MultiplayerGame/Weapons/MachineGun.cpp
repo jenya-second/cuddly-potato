@@ -36,11 +36,8 @@ void AMachineGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
 {
 	ADefaultCharacter* PlayerOwner = Cast<ADefaultCharacter>(GetOwner());
 	if (PlayerOwner != nullptr) {
-		FActorSpawnParameters par = FActorSpawnParameters();
-		par.Owner = PlayerOwner;
 		ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActorDeferred<ADefaultBullet>(PlayerOwner->BulletManager->CurrentBullet, SpawnTransform, PlayerOwner));
 		if (Actor != nullptr) {
-			
 			Actor->Damage *= BulletDamageScale;
 			Actor->LinearDamping = LinearDamp;
 			Actor->FinishSpawning(SpawnTransform);

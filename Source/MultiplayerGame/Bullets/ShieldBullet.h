@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,5 +18,5 @@ public:
 	virtual void DoDamage(AActor* Actor) override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
-	float ShieldIncrease;
+	float ShieldKoef;
 };

@@ -43,8 +43,6 @@ void AShotGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
 {
 	ADefaultCharacter* PlayerOwner = Cast<ADefaultCharacter>(GetOwner());
 	if (PlayerOwner != nullptr) {
-		FActorSpawnParameters par = FActorSpawnParameters();
-		par.Owner = PlayerOwner;
 		for (int i = 0; i < 16; i++) {
 			ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActorDeferred<ADefaultBullet>(PlayerOwner->BulletManager->CurrentBullet, SpawnTransform, PlayerOwner));
 			if (Actor != nullptr) {

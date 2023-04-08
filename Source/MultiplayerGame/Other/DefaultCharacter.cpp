@@ -35,6 +35,10 @@ ADefaultCharacter::ADefaultCharacter()
 void ADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (GetLocalRole() == ROLE_SimulatedProxy) {
+		bUseControllerRotationPitch = true;
+	}
+	
 }
 
 void ADefaultCharacter::Tick(float DeltaTime)
