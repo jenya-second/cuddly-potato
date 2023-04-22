@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MatchGameMode.h"
 #include <MultiplayerGame/Other/MatchGameState.h>
 #include <MultiplayerGame/Other/DefaultPlayerState.h>
@@ -9,7 +6,8 @@
 #include "GameFramework/SpectatorPawn.h"
 #include "DefaultPlayerController.h"
 #include "AIController.h"
-
+#include <Kismet/GameplayStatics.h>
+#include <MultiplayerGame/MyActors/DispenserCreator.h>
 
 void AMatchGameMode::BeginPlay()
 {
@@ -22,6 +20,14 @@ void AMatchGameMode::StartGame()
 { 
 	if (GS() != nullptr) {
 		GS()->MatchInProgress = true;
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADispenserCreator::StaticClass(), FoundActors);
+		for (int i = 0; i < FoundActors.Num(); i++) {
+			ADispenserCreator* DC = Cast<ADispenserCreator>(FoundActors[i]);
+			if (DC != nullptr) {
+				DC->StartCreating();
+			}
+		}
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
 			Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->CleanStats();
 			RestartPlayer(Cast<AController>(GS()->PlayerArray[i]->GetOwner()));		
@@ -39,6 +45,14 @@ void AMatchGameMode::EndGame()
 {
 	if (GS() != nullptr) {
 		GS()->MatchInProgress = false;
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADispenserCreator::StaticClass(), FoundActors);
+		for (int i = 0; i < FoundActors.Num(); i++) {
+			ADispenserCreator* DC = Cast<ADispenserCreator>(FoundActors[i]);
+			if (DC != nullptr) {
+				DC->StopCreating();
+			}
+		}
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
 			GetWorldTimerManager().ClearTimer(Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->ForRespawn);
 			AController* PC = Cast<AController>(GS()->PlayerArray[i]->GetOwner());
@@ -182,6 +196,7 @@ void AMatchGameMode::ApplyDamageToCh(ACharacter* Ch, ACharacter* Ins, float Dama
 	ADefaultCharacter* DCh = Cast<ADefaultCharacter>(Ch);
 	ADefaultCharacter* ICh = Cast<ADefaultCharacter>(Ins);
 	if (DCh != nullptr && ICh!=nullptr) {
+		DCh->OnReceiveDamage(ICh);
 		float NewShield = DCh->Shield - Damage;
 		if (NewShield < 0) {
 			float NewHelth = DCh->CurrentHealth + NewShield;

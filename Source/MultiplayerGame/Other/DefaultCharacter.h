@@ -101,6 +101,8 @@ public:
 	void UnPressAlternativeShoot();
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastUpdateCameraView(FRotator rot);
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void OnReceiveDamage(ADefaultCharacter* Ins);
 
 private:
 	TArray<FInputActionBinding> AcBind;

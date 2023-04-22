@@ -24,7 +24,7 @@ public:
 
 	int32 IndexBullet = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Bullets")
 	TArray<int32> CountBullets;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")

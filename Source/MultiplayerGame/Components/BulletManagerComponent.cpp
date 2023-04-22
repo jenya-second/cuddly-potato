@@ -41,5 +41,6 @@ void UBulletManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UBulletManagerComponent, CurrentBullet);
+	DOREPLIFETIME(UBulletManagerComponent, CountBullets);
 }
 

@@ -52,7 +52,7 @@ void AShotGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
 				FVector vect = SpawnTransform.Rotator().Vector() *
 					Actor->Speed * BulletSpeedScale;
 				
-				Actor->ProjectileComponent->Velocity = vect.RotateAngleAxis(FMath::FRandRange(0, Angle), FVector(FMath::FRandRange(0, 1), FMath::FRandRange(0, 1), FMath::FRandRange(0, 1))) * FMath::FRandRange(0.9, 1.1);
+				Actor->ProjectileComponent->Velocity = vect.RotateAngleAxis(FMath::FRandRange(0, Angle), FVector(FMath::FRandRange(-1, 1), FMath::FRandRange(-1, 1), FMath::FRandRange(-1, 1))) * FMath::FRandRange(0.9, 1.1);
 			}
 		}
 		

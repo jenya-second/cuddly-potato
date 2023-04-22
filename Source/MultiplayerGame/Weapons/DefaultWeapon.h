@@ -17,9 +17,6 @@ public:
 	// Sets default values for this actor's properties
 	ADefaultWeapon();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
-	int32 Ammo = 0;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Ammo")
 	UStaticMeshComponent* WeaponBody;
 

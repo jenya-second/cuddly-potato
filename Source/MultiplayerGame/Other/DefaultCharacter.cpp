@@ -336,3 +336,7 @@ void ADefaultCharacter::SetMat(FColor Col)
 		Arms->SetMaterialByName(Arms->GetMaterialSlotNames()[i], ANewMat);
 	}
 }
+
+void ADefaultCharacter::OnReceiveDamage_Implementation(ADefaultCharacter* Ins)
+{
+}

@@ -15,7 +15,8 @@ class MULTIPLAYERGAME_API ADefaultBullet : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ADefaultBullet();
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
+	FColor BulletColor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
 	float Damage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
