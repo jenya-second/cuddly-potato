@@ -103,7 +103,8 @@ public:
 	void MulticastUpdateCameraView(FRotator rot);
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	void OnReceiveDamage(ADefaultCharacter* Ins);
-
+	UFUNCTION(Client, Reliable)
+	void ChangeUseControllerRotation();
 private:
 	TArray<FInputActionBinding> AcBind;
 	TArray<FInputAxisBinding> AxBind;

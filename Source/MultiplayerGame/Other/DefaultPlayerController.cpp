@@ -169,3 +169,38 @@ void ADefaultPlayerController::OnUnPos_Implementation()
 		CharacterWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+
+void ADefaultPlayerController::ChangeDistanceKoefForBullet_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->DistanceKoefForBullet = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeHealthKoef_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->HealthKoef = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeDistanceKoefForWeapon_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->DistanceKoefForWeapon = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeBulletKoef_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->BulletKoef = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeTargetDistance_Implementation(float NewDistance)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->TargetDistance = NewDistance;
+	}
+}

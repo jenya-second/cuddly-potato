@@ -26,9 +26,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bow")
 	float PullKoef;
-	FTimerHandle ResetHandle;
-	void PrepareToShoot();
 
+	FTimerHandle ResetHandle;
+	FTimerHandle SetCanFireHandle;
+	void BotShoot() override;
+	void PrepareToShoot();
+	void SetCanFireTrue();
+	UFUNCTION(BlueprintCallable)
 	virtual void PressShoot() override;
 	virtual void PressAlternativeShoot() override;
 	virtual void UnPressShoot() override;

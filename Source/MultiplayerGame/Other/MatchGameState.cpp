@@ -81,4 +81,12 @@ void AMatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AMatchGameState, MatchInProgress);
 	DOREPLIFETIME(AMatchGameState, Time);
 	DOREPLIFETIME(AMatchGameState, RestartTime);
+	DOREPLIFETIME(AMatchGameState, Distance1);
+	DOREPLIFETIME(AMatchGameState, Distance2);
+	DOREPLIFETIME(AMatchGameState, Distance3);
+	DOREPLIFETIME(AMatchGameState, DistanceKoefForBullet);
+	DOREPLIFETIME(AMatchGameState, HealthKoef);
+	DOREPLIFETIME(AMatchGameState, DistanceKoefForWeapon);
+	DOREPLIFETIME(AMatchGameState, BulletKoef);
+	DOREPLIFETIME(AMatchGameState, TargetDistance);
 }

@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullet")
 	UProjectileMovementComponent* ProjectileComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	TArray<float> WeaponKoef;
+
 protected:
 	virtual void BeginPlay() override;
 

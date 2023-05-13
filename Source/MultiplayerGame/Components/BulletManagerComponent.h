@@ -22,6 +22,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Bullets")
 	TSubclassOf<ADefaultBullet> CurrentBullet;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Bullets")
 	int32 IndexBullet = 0;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Bullets")
@@ -30,6 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
 	TArray<TSubclassOf<ADefaultBullet>> BulletsClasses;
 
+	UFUNCTION(BlueprintCallable)
 	void SetCurrentBullet(int32 Index);
 
 protected:

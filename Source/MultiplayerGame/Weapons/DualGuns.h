@@ -12,8 +12,6 @@ class MULTIPLAYERGAME_API ADualGuns : public ADefaultWeapon
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShotGun")
-	bool CanFire = true;
 	void SetCanFireTrue();
 	virtual void PressShoot() override;
 	virtual void PressAlternativeShoot() override;

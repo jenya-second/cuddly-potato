@@ -11,6 +11,7 @@
 #include <MultiplayerGame/Widgets/MatchInfo.h>
 #include <MultiplayerGame/Widgets/PauseMenuWidget.h>
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include <Kismet/GameplayStatics.h>
 
 
 ADefaultCharacter::ADefaultCharacter()
@@ -35,9 +36,7 @@ ADefaultCharacter::ADefaultCharacter()
 void ADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (GetLocalRole() == ROLE_SimulatedProxy) {
-		bUseControllerRotationPitch = true;
-	}
+	
 	
 }
 
@@ -318,7 +317,6 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 		
 		WeaponManager->SetCurrentWeapon(0);
 	}
-	
 }
 
 void ADefaultCharacter::SetMat(FColor Col)
@@ -339,4 +337,11 @@ void ADefaultCharacter::SetMat(FColor Col)
 
 void ADefaultCharacter::OnReceiveDamage_Implementation(ADefaultCharacter* Ins)
 {
+}
+
+void ADefaultCharacter::ChangeUseControllerRotation_Implementation()
+{
+	if (GetOwner()!=nullptr) {
+		bUseControllerRotationPitch = true;
+	}
 }

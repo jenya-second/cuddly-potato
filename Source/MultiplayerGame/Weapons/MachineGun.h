@@ -12,7 +12,6 @@ class MULTIPLAYERGAME_API AMachineGun : public ADefaultWeapon
 {
 	GENERATED_BODY()
 public:
-	
 	virtual void PressShoot() override;
 	virtual void PressAlternativeShoot() override;
 	void SetCanFireTrue();
@@ -28,7 +27,5 @@ public:
 	float CurrentCharge;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MashineGun")
 	float ChargingSpeed = 2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MashineGun")
-	bool CanFire = true;
 	FTimerHandle ResetHandle;
 };

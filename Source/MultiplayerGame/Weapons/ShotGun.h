@@ -16,10 +16,8 @@ class MULTIPLAYERGAME_API AShotGun : public ADefaultWeapon
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShotGun")
-	bool CanFire = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShotGun")
 	float Angle;
-	
+
 	virtual void PressShoot() override;
 	virtual void PressAlternativeShoot() override;
 	void SetCanFireTrue();

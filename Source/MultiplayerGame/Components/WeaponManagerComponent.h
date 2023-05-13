@@ -31,7 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	TArray<TSubclassOf<ADefaultWeapon>> WeaponsClasses;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void SetCurrentWeapon(int32 Index);
 
 	UFUNCTION(NetMulticast, Reliable)

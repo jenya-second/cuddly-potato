@@ -58,3 +58,9 @@ void ADefaultWeapon::UnPressAlternativeShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UnPressAlternativeShoot"));
 }
+
+void ADefaultWeapon::BotShoot()
+{
+	PressShoot();
+	UnPressShoot();
+}

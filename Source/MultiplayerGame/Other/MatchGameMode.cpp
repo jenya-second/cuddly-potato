@@ -89,8 +89,10 @@ bool AMatchGameMode::IsReadyToStartGame()
 			return false;
 		}
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
-			if (!Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->isReady) {
-				return false;
+			if (!Cast<AAIController>(GS()->PlayerArray[i]->GetOwner())) {
+				if (!Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->isReady) {
+					return false;
+				}
 			}
 		}
 		StartGame();

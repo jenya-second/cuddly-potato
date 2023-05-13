@@ -9,20 +9,32 @@ void ABow::BeginPlay()
 {
 	Super::BeginPlay();
 	FOnTimelineFloat progressFunction{};
-	
+	CanFire = false;
 	progressFunction.BindDynamic(this, &ABow::EffectProgress);
 	TimeLine->SetTimelineLength(1);
 	TimeLine->AddInterpFloat(Curve, progressFunction);
 }
 
+void ABow::SetCanFireTrue()
+{
+	CanFire = true;
+}
+
 void ABow::PrepareToShoot()
 {
 	TimeLine->PlayFromStart();
+	GetWorldTimerManager().SetTimer(SetCanFireHandle, this, &ABow::SetCanFireTrue, 1, false);
 }
 
 void ABow::EffectProgress(float Value)
 {
 	PullKoef = Value;
+}
+
+void ABow::BotShoot() 
+{
+	UnPressShoot();
+	PressShoot();
 }
 
 void ABow::PressShoot()
@@ -43,6 +55,7 @@ void ABow::PressAlternativeShoot()
 void ABow::UnPressShoot()
 {
 	ADefaultCharacter* PlayerOwner = Cast<ADefaultCharacter>(GetOwner());
+	GetWorldTimerManager().ClearTimer(SetCanFireHandle);
 	if (PlayerOwner != nullptr) {
 		if (GetWorldTimerManager().IsTimerActive(ResetHandle) || PlayerOwner->BulletManager->CountBullets[PlayerOwner->BulletManager->IndexBullet] == 0) {
 			GetWorldTimerManager().ClearTimer(ResetHandle);
@@ -52,6 +65,7 @@ void ABow::UnPressShoot()
 			MulticastSpawnArrow(SpawnTransform, PullKoef);
 			PlayerOwner->BulletManager->CountBullets[PlayerOwner->BulletManager->IndexBullet]--;
 		}
+		CanFire = false;
 	}
 }
 

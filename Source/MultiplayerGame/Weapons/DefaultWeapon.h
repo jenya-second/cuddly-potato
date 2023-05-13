@@ -16,6 +16,12 @@ class MULTIPLAYERGAME_API ADefaultWeapon : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ADefaultWeapon();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	bool CanFire = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	float CheckRadius = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	float TargetDistance = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Ammo")
 	UStaticMeshComponent* WeaponBody;
@@ -54,4 +60,6 @@ public:
 	virtual void PressAlternativeShoot();
 	virtual void UnPressAlternativeShoot();
 
+	UFUNCTION(BlueprintCallable)
+	virtual void BotShoot();
 };

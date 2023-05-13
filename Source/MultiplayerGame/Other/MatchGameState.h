@@ -43,6 +43,23 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "GameStateSettings")
 	float Time;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float Distance1;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float Distance2;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float Distance3;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float DistanceKoefForBullet;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float HealthKoef;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float DistanceKoefForWeapon;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float BulletKoef;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "AI")
+	float TargetDistance;
+
 	UFUNCTION()
 	void OnRep_MatchInProgress();
 	/*UFUNCTION(Server, Reliable, BlueprintCallable)

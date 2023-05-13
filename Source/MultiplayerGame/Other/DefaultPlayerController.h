@@ -71,6 +71,19 @@ public:
 	void ChangeMaxKills(int32 newInt);
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ChangeTime(float NewTime);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ChangeDistanceKoefForBullet(float NewKoef);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ChangeHealthKoef(float NewKoef);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ChangeDistanceKoefForWeapon(float NewKoef);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ChangeBulletKoef(float NewKoef);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ChangeTargetDistance(float NewDistance);
+
+
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void AddBotToTeam(ADefaultTeam* Team);
 	UFUNCTION(Server, Reliable, BlueprintCallable)
