@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MatchGameMode.h"
 #include <MultiplayerGame/Other/MatchGameState.h>
 #include <MultiplayerGame/Other/DefaultPlayerState.h>
@@ -8,11 +5,9 @@
 #include <MultiplayerGame/Other/DefaultCharacter.h>
 #include "GameFramework/SpectatorPawn.h"
 #include "DefaultPlayerController.h"
-
-//AMatchGameMode::AMatchGameMode(const FObjectInitializer& ObjectInitializer)
-//{
-//	PlayerControllerClass= APlayerController::StaticClass();
-//}
+#include "AIController.h"
+#include <Kismet/GameplayStatics.h>
+#include <MultiplayerGame/MyActors/DispenserCreator.h>
 
 void AMatchGameMode::BeginPlay()
 {
@@ -25,6 +20,14 @@ void AMatchGameMode::StartGame()
 { 
 	if (GS() != nullptr) {
 		GS()->MatchInProgress = true;
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADispenserCreator::StaticClass(), FoundActors);
+		for (int i = 0; i < FoundActors.Num(); i++) {
+			ADispenserCreator* DC = Cast<ADispenserCreator>(FoundActors[i]);
+			if (DC != nullptr) {
+				DC->StartCreating();
+			}
+		}
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
 			Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->CleanStats();
 			RestartPlayer(Cast<AController>(GS()->PlayerArray[i]->GetOwner()));		
@@ -42,21 +45,35 @@ void AMatchGameMode::EndGame()
 {
 	if (GS() != nullptr) {
 		GS()->MatchInProgress = false;
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADispenserCreator::StaticClass(), FoundActors);
+		for (int i = 0; i < FoundActors.Num(); i++) {
+			ADispenserCreator* DC = Cast<ADispenserCreator>(FoundActors[i]);
+			if (DC != nullptr) {
+				DC->StopCreating();
+			}
+		}
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
 			GetWorldTimerManager().ClearTimer(Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->ForRespawn);
-			ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(GS()->PlayerArray[i]->GetOwner());
+			AController* PC = Cast<AController>(GS()->PlayerArray[i]->GetOwner());
 			PC->GetPawn()->Destroy();
-			/*RestartPlayer(Cast<ADefaultPlayerController>(GS()->PlayerArray[i]->GetOwner()));*/
-			PC->OnEndGame();
+			ADefaultPlayerController* DPC = Cast<ADefaultPlayerController>(PC);
+			if (DPC) {
+				DPC->OnEndGame();
+			}
 		}
 	}
 }
 
-void AMatchGameMode::OnRestart(ADefaultPlayerController* PC)
+void AMatchGameMode::OnRestart(AController* C)
 {
-	if (PC != nullptr) {
-		RestartPlayer(PC);
-		PC->OnRestart();
+	if (C != nullptr) {
+		RestartPlayer(C);
+		ADefaultPlayerController* DPC = Cast<ADefaultPlayerController>(C);
+		if (DPC != nullptr) {
+			DPC->OnRestart();
+		}
+		
 	}
 }
 
@@ -72,8 +89,10 @@ bool AMatchGameMode::IsReadyToStartGame()
 			return false;
 		}
 		for (int i = 0; i < GS()->PlayerArray.Num(); i++) {
-			if (!Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->isReady) {
-				return false;
+			if (!Cast<AAIController>(GS()->PlayerArray[i]->GetOwner())) {
+				if (!Cast<ADefaultPlayerState>(GS()->PlayerArray[i])->isReady) {
+					return false;
+				}
 			}
 		}
 		StartGame();
@@ -90,15 +109,54 @@ AMatchGameState* AMatchGameMode::GS()
 void AMatchGameMode::ChangeTeam(APlayerState* PS, int32 TeamIndex)
 {
 	ADefaultPlayerState* DPS = Cast<ADefaultPlayerState>(PS);
-	if (TeamIndex == -1 || DPS==nullptr) {
+	if (TeamIndex == -1 || DPS == nullptr) {
+		return;
+	}
+	ChangeTeamByTeam(PS, GS()->Teams[TeamIndex]);
+}
+
+void AMatchGameMode::AddBotToTeam(ADefaultTeam* Team)
+{
+	AAIController* AIC = Cast<AAIController>(GetWorld()->SpawnActor(AIControllerClass));
+	if (AIC == nullptr) {
+		return;
+	}
+	const FTransform tr;
+	FActorSpawnParameters par = FActorSpawnParameters();
+	par.Owner = AIC;
+	ADefaultPlayerState* PS = Cast<ADefaultPlayerState>(GetWorld()->SpawnActor(PlayerStateClass, &tr, par));
+	if (PS != nullptr) {
+		AIC->PlayerState = PS;
+		ChangeTeamByTeam(PS, Team);
+		PS->isReady = true;
+		PS->SetPlayerName(FString("Bot"));
+	}
+	
+}
+
+void AMatchGameMode::RemoveBotFromTeam(ADefaultTeam* Team)
+{
+	for (int i = 0; i < Team->TeamArray.Num(); i++) {
+		AAIController* AIC = Cast<AAIController>(Team->TeamArray[i]->GetOwner());
+		if (AIC != nullptr) {
+			AIC->Destroy();
+			
+		}
+	}
+}
+
+void AMatchGameMode::ChangeTeamByTeam(APlayerState* PS, ADefaultTeam* Team)
+{
+	ADefaultPlayerState* DPS = Cast<ADefaultPlayerState>(PS);
+	if (DPS == nullptr) {
 		return;
 	}
 	else {
-		if (DPS->Team!=nullptr) {
+		if (DPS->Team != nullptr) {
 			DPS->Team->TeamArray.Remove(DPS);
 		}
-		GS()->Teams[TeamIndex]->TeamArray.Add(DPS);
-		DPS->Team = GS()->Teams[TeamIndex];
+		Team->TeamArray.Add(DPS);
+		DPS->Team = Team;
 	}
 }
 
@@ -140,6 +198,7 @@ void AMatchGameMode::ApplyDamageToCh(ACharacter* Ch, ACharacter* Ins, float Dama
 	ADefaultCharacter* DCh = Cast<ADefaultCharacter>(Ch);
 	ADefaultCharacter* ICh = Cast<ADefaultCharacter>(Ins);
 	if (DCh != nullptr && ICh!=nullptr) {
+		DCh->OnReceiveDamage(ICh);
 		float NewShield = DCh->Shield - Damage;
 		if (NewShield < 0) {
 			float NewHelth = DCh->CurrentHealth + NewShield;
@@ -219,10 +278,13 @@ void AMatchGameMode::OnDead(ACharacter* Ch, ACharacter* Ins)
 			DCh->OnDead();
 			DCh->DestroyWeapons();
 			FTimerDelegate del;
-			ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(DCh->GetOwner());
-			if (PC != nullptr) {
-				PC->OnDead();
-				del.BindUFunction(this, FName("OnRestart"), PC);
+			AController* C = Cast<AController>(DCh->GetOwner());
+			if (C != nullptr) {
+				ADefaultPlayerController* DPC = Cast<ADefaultPlayerController>(C);
+				if (DPC != nullptr) {
+					DPC->OnDead();
+				}
+				del.BindUFunction(this, FName("OnRestart"), C);
 			}
 			GetWorldTimerManager().SetTimer(B->ForRespawn,del,GS()->RestartTime, false);
 		}
@@ -274,7 +336,13 @@ void AMatchGameMode::RestartPlayer(AController* Controller)
 {
 	AActor* PlayerStart = FindPlayerStart(Controller);
 	if (PlayerStart != nullptr) {
-		APawn* NewPawn = Cast<APawn>(GetWorld()->SpawnActor(DefaultPawnClass, &PlayerStart->GetTransform()));
+		APawn* NewPawn;
+		if (Cast<AAIController>(Controller) != nullptr) {
+			NewPawn = Cast<APawn>(GetWorld()->SpawnActor(AICharacterClass, &PlayerStart->GetTransform()));
+		}
+		else {
+			NewPawn = Cast<APawn>(GetWorld()->SpawnActor(DefaultPawnClass, &PlayerStart->GetTransform()));
+		}
 		if (NewPawn != nullptr) {
 			APawn* A = Controller->GetPawn();
 			Controller->Possess(NewPawn);

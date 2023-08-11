@@ -63,7 +63,8 @@ void AMatchGameState::OnRep_MatchInProgress()
 
 void AMatchGameState::OnRep_Teams()
 {
-	Cast<ADefaultPlayerController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0))->WarmUp->UpdateTeams();
+	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 0));
+	PC->WarmUp->UpdateTeams();
 }
 
 void AMatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -80,4 +81,12 @@ void AMatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AMatchGameState, MatchInProgress);
 	DOREPLIFETIME(AMatchGameState, Time);
 	DOREPLIFETIME(AMatchGameState, RestartTime);
+	DOREPLIFETIME(AMatchGameState, Distance1);
+	DOREPLIFETIME(AMatchGameState, Distance2);
+	DOREPLIFETIME(AMatchGameState, Distance3);
+	DOREPLIFETIME(AMatchGameState, DistanceKoefForBullet);
+	DOREPLIFETIME(AMatchGameState, HealthKoef);
+	DOREPLIFETIME(AMatchGameState, DistanceKoefForWeapon);
+	DOREPLIFETIME(AMatchGameState, BulletKoef);
+	DOREPLIFETIME(AMatchGameState, TargetDistance);
 }

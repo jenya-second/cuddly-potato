@@ -22,7 +22,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "aa")
 	UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "aa")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "aa")
 	UWeaponManagerComponent* WeaponManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "aa")
@@ -45,6 +45,12 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "aa")
 	float Shield = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	bool bShootPressed = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
+	bool bAltShootPressed = false;
 
 	UFUNCTION()
 	void OnRep_CurrentHealth();
@@ -93,12 +99,15 @@ public:
 	void PressAlternativeShoot();
 	UFUNCTION(Server, Reliable)
 	void UnPressAlternativeShoot();
-
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastUpdateCameraView(FRotator rot);
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void OnReceiveDamage(ADefaultCharacter* Ins);
+	UFUNCTION(Client, Reliable)
+	void ChangeUseControllerRotation();
 private:
 	TArray<FInputActionBinding> AcBind;
 	TArray<FInputAxisBinding> AxBind;
 
-
-	
 	
 };

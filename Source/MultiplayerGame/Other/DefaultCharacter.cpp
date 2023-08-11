@@ -11,6 +11,7 @@
 #include <MultiplayerGame/Widgets/MatchInfo.h>
 #include <MultiplayerGame/Widgets/PauseMenuWidget.h>
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include <Kismet/GameplayStatics.h>
 
 
 ADefaultCharacter::ADefaultCharacter()
@@ -21,7 +22,7 @@ ADefaultCharacter::ADefaultCharacter()
 	Camera->bUsePawnControlRotation = true;
 	WeaponManager = CreateDefaultSubobject<UWeaponManagerComponent>("WeaponManager");
 	BulletManager = CreateDefaultSubobject<UBulletManagerComponent>("BulletManager");
-	AimManager = CreateDefaultSubobject<UAimManagerComponent>("AimWeapon");
+	
 	Arms = CreateDefaultSubobject<USkeletalMeshComponent>("ArmsMesh");
 	Arms->SetupAttachment(RootComponent);
 	Arms->SetOnlyOwnerSee(true);
@@ -35,16 +36,28 @@ ADefaultCharacter::ADefaultCharacter()
 void ADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	
 }
 
 void ADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (GetLocalRole() == ROLE_Authority) {
+		MulticastUpdateCameraView(Controller->GetControlRotation());
+	}
+}
+
+void ADefaultCharacter::MulticastUpdateCameraView_Implementation(FRotator rot)
+{
+	if (!Controller || GetLocalRole() == ROLE_Authority) {
+		FRotator ro = this->Camera->GetComponentRotation();
+		this->Camera->SetWorldRotation(FRotator(rot.Pitch, ro.Yaw, ro.Roll));
+	}
 }
 
 void ADefaultCharacter::MoveForward(float X)
 {
-
 	FRotator rot = FRotator(0.0, GetControlRotation().Yaw, 0.0);
 	FVector Vector = rot.Vector();
 	AddMovementInput(Vector, X);
@@ -74,30 +87,49 @@ void ADefaultCharacter::LookUp(float X)
 
 void ADefaultCharacter::PressShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
-		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->CurrentWeapon, &ADefaultWeapon::PressShoot, WeaponManager->CurrentWeapon->FireSpeed, true, 0);
+	bShootPressed = true;
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr && WeaponManager->Weapons[WeaponManager->IndexWeapon]->bIsAutomatic) {
+		GetWorldTimerManager().SetTimer(ForShoot, WeaponManager->Weapons[WeaponManager->IndexWeapon], &ADefaultWeapon::PressShoot, WeaponManager->Weapons[WeaponManager->IndexWeapon]->FireSpeed, true, 0);
+	}
+	else {
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->PressShoot();
 	}
 }
 
 void ADefaultCharacter::UnPressShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
+	bShootPressed = false;
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
 		GetWorldTimerManager().ClearTimer(ForShoot);
-		WeaponManager->CurrentWeapon->UnPressShoot();
-	}	
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->UnPressShoot();
+	}
 }
 
 void ADefaultCharacter::PressAlternativeShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
-		WeaponManager->CurrentWeapon->PressAlternativeShoot();
+	bAltShootPressed = true;
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->PressAlternativeShoot();
 	}	
 }
 
 void ADefaultCharacter::UnPressAlternativeShoot_Implementation()
 {
-	if (WeaponManager->CurrentWeapon != nullptr) {
-		WeaponManager->CurrentWeapon->UnPressAlternativeShoot();
+	bAltShootPressed = false;
+	if (WeaponManager->Weapons.Num() == 0) {
+		return;
+	}
+	if (WeaponManager->Weapons[WeaponManager->IndexWeapon] != nullptr) {
+		WeaponManager->Weapons[WeaponManager->IndexWeapon]->UnPressAlternativeShoot();
 	}	
 }
 
@@ -114,8 +146,9 @@ void ADefaultCharacter::StopJump()
 void ADefaultCharacter::DestroyWeapons()
 {
 	if (WeaponManager != nullptr) {
-		for (int i = 0; i < WeaponManager->Weapons.Num(); i++) {
-			if (WeaponManager->Weapons.Num() > i) {
+		int a = WeaponManager->Weapons.Num();
+		for (int i = 0; i < a; i++) {
+			if (WeaponManager->Weapons[i]) {
 				WeaponManager->Weapons[i]->Destroy();
 			}
 		}
@@ -167,19 +200,29 @@ void ADefaultCharacter::OnStatsPressed()
 
 void ADefaultCharacter::OnDead_Implementation()
 {
-	DisableInput(Cast<APlayerController>(Controller));
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	if (PC) {
+		DisableInput(PC);
+	}
 	GetMesh()->SetAllBodiesSimulatePhysics(true);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ADefaultCharacter::NextWeapon_Implementation()
 {
+	if (bShootPressed) {
+		UnPressShoot();
+		bShootPressed = true;
+	}
 	int32 a = WeaponManager->IndexWeapon + 1;
-	if (a == WeaponManager->Weapons.Num())
+	if (a == WeaponManager->WeaponsClasses.Num())
 	{
 		a = 0;
 	}
 	WeaponManager->SetCurrentWeapon(a);
+	if (bShootPressed) {
+		PressShoot();
+	}
 }
 
 void ADefaultCharacter::NextBullet_Implementation()
@@ -197,8 +240,7 @@ void ADefaultCharacter::OnRep_CurrentHealth()
 	if (GetLocalRole() == ROLE_SimulatedProxy) {
 		if (CurrentHealth <= 0)
 		{
-			FString deathMessage = FString::Printf(TEXT("You have been killed."));
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+
 		}
 	}
 }
@@ -246,6 +288,10 @@ void ADefaultCharacter::Destroyed()
 
 void ADefaultCharacter::UnPossessed()
 {
+	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(Controller);
+	if (PC != nullptr) {
+		PC->OnUnPos();
+	}
 	Super::UnPossessed();
 }
 
@@ -253,20 +299,49 @@ void ADefaultCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	ADefaultPlayerState* PS = Cast<ADefaultPlayerState>(GetController()->PlayerState);
+	if (PS == nullptr) {
+		return;
+	}
+	if (PS->Team == nullptr) {
+		return;
+	}
 	PS->isDamageble = true;
 	Color = PS->Team->TeamColor;
 	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(NewController);
 	if (PC != nullptr) {
 		PC->SetModeGameOnly();
+		PC->OnPos();
+	}
+	WeaponManager->NetSetWeapon();
+	if (GetLocalRole() == ROLE_Authority) {
+		
+		WeaponManager->SetCurrentWeapon(0);
 	}
 }
 
 void ADefaultCharacter::SetMat(FColor Col)
 {
 	TArray<UMaterialInterface*> Mat = GetMesh()->GetMaterials();
+	TArray<UMaterialInterface*> AMat = Arms->GetMaterials();
 	for (int i = 0; i < Mat.Num(); i++) {
 		UMaterialInstanceDynamic* NewMat = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, Mat[i]);
 		NewMat->SetVectorParameterValue(FName("Color"), Col);
 		GetMesh()->SetMaterialByName(GetMesh()->GetMaterialSlotNames()[i], NewMat);
+	}
+	for (int i = 0; i < AMat.Num(); i++) {
+		UMaterialInstanceDynamic* ANewMat = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, AMat[i]);
+		ANewMat->SetVectorParameterValue(FName("Color"), Col);
+		Arms->SetMaterialByName(Arms->GetMaterialSlotNames()[i], ANewMat);
+	}
+}
+
+void ADefaultCharacter::OnReceiveDamage_Implementation(ADefaultCharacter* Ins)
+{
+}
+
+void ADefaultCharacter::ChangeUseControllerRotation_Implementation()
+{
+	if (GetOwner()!=nullptr) {
+		bUseControllerRotationPitch = true;
 	}
 }

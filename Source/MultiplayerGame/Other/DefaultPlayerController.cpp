@@ -8,6 +8,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "MatchGameState.h"
 #include "MatchGameMode.h"
+#include "DefaultCharacter.h"
 
 void ADefaultPlayerController::BeginPlay()
 {
@@ -16,9 +17,17 @@ void ADefaultPlayerController::BeginPlay()
 		PauseMenu = CreateWidget<UPauseMenuWidget>(this, PauseMenuClass);
 		MatchStats = CreateWidget<UMatchInfo>(this, MatchStatsClass);
 		WarmUp = CreateWidget<UWarmUpWidget>(this, WarmUpClass);
-		PauseMenu->AddToViewport(0);
+		CharacterWidget = CreateWidget<UUserWidget>(this, CharacterWidgetClass);
+		CharacterWidget->AddToViewport(0);
+		PauseMenu->AddToViewport(1);
 		MatchStats->AddToViewport(0);
 		WarmUp->AddToViewport(0);
+		if (Cast<ADefaultCharacter>(GetPawn()) != nullptr) {
+			CharacterWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		else {
+			CharacterWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
 		PauseMenu->SetVisibility(ESlateVisibility::Hidden);
 		MatchStats->SetVisibility(ESlateVisibility::Hidden);
 		WarmUp->SetVisibility(ESlateVisibility::Visible);
@@ -134,5 +143,64 @@ void ADefaultPlayerController::ChangeTime_Implementation(float NewTime)
 {
 	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
 		Cast<AMatchGameState>(GetWorld()->GetGameState())->Time = NewTime;
+	}
+}
+
+void ADefaultPlayerController::AddBotToTeam_Implementation(ADefaultTeam* Team)
+{
+	Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->AddBotToTeam(Team);
+}
+
+void ADefaultPlayerController::RemoveBotFromTeam_Implementation(ADefaultTeam* Team)
+{
+	Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->RemoveBotFromTeam(Team);
+}
+
+void ADefaultPlayerController::OnPos_Implementation()
+{
+	if (CharacterWidget != nullptr) {
+		CharacterWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void ADefaultPlayerController::OnUnPos_Implementation()
+{
+	if (CharacterWidget != nullptr) {
+		CharacterWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void ADefaultPlayerController::ChangeDistanceKoefForBullet_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->DistanceKoefForBullet = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeHealthKoef_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->HealthKoef = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeDistanceKoefForWeapon_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->DistanceKoefForWeapon = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeBulletKoef_Implementation(float NewKoef)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->BulletKoef = NewKoef;
+	}
+}
+
+void ADefaultPlayerController::ChangeTargetDistance_Implementation(float NewDistance)
+{
+	if (Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode())->CanChangeState(PlayerState)) {
+		Cast<AMatchGameState>(GetWorld()->GetGameState())->TargetDistance = NewDistance;
 	}
 }

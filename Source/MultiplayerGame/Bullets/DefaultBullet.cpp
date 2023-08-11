@@ -9,18 +9,20 @@
 ADefaultBullet::ADefaultBullet()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
-	SetReplicateMovement(true);
+	
+	ProjectileComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
+	ProjectileComponent->SetIsReplicated(true);
+	ProjectileComponent->bForceSubStepping = true;
 	BulletBody = CreateDefaultSubobject<UStaticMeshComponent>("BulletMesh");
 	RootComponent = BulletBody;
 	BulletBody->SetGenerateOverlapEvents(true);
 	BulletBody->SetCollisionProfileName("OverlapAll");
 	BulletBody->SetEnableGravity(false);
 	BulletBody->SetNotifyRigidBodyCollision(true);
-	BulletBody->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	BulletBody->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	BulletBody->SetCollisionResponseToChannel(ECollisionChannel::ECC_Vehicle, ECollisionResponse::ECR_Ignore);
-	BulletBody->SetSimulatePhysics(true);
+	BulletBody->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BulletBody->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+	BulletBody->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	BulletBody->SetCollisionResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Ignore);
 }
 
 void ADefaultBullet::BeginPlay()
@@ -31,20 +33,46 @@ void ADefaultBullet::BeginPlay()
 void ADefaultBullet::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+	
+}
+
+void ADefaultBullet::NotifyActorBeginOverlap(AActor* Actor)
+{
+	Super::NotifyActorBeginOverlap(Actor);
+	if (Actor == GetOwner()) {
+		return;
+	}
+	if (GetWorld()->GetAuthGameMode()) {
+		DoDamage(Actor);
+	}
+	Destroy();
+}
+
+void ADefaultBullet::DoDamage(AActor* Actor)
+{
+	
+	ADefaultCharacter* Ch = Cast<ADefaultCharacter>(Actor);
 	AMatchGameMode* GM = Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode());
-	if (GetLocalRole() == ROLE_Authority) {
-		ADefaultCharacter* Ch = Cast<ADefaultCharacter>(Other);
-		if (Ch != nullptr) {
-			APlayerState* PS = Cast<ADefaultCharacter>(GetOwner())->GetPlayerState();
-			if (GM->CanDamage(Ch->GetPlayerState(), PS)) {
-				GM->ApplyDamageToCh(Ch, Cast<ACharacter>(GetOwner()), Damage);
-			}
+	
+	if (GetOwner() == nullptr) {
+		return;
+	}
+	
+	
+	if (Ch != nullptr) {
+		APlayerState* PS = Cast<ADefaultCharacter>(GetOwner())->GetPlayerState();
+		if (GM->CanDamage(Ch->GetPlayerState(), PS)) {
+			GM->ApplyDamageToCh(Ch, Cast<ACharacter>(GetOwner()), Damage);
 		}
-		Destroy();
 	}
 }
 
 void ADefaultBullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (LinearDamping == 0) {
+		return;
+	}
+	FVector damp = ProjectileComponent->Velocity*LinearDamping;
+	ProjectileComponent->Velocity = ProjectileComponent->Velocity - damp*DeltaTime;
 }

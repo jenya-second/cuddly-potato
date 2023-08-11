@@ -11,7 +11,6 @@ void ADefaultGameSession::RegisterServer()
 	UE_LOG(LogTemp, Log, TEXT("Creating session----------------------------------------------------------------------------"));
 	IOnlineSubsystem* OnlineSubSystem = IOnlineSubsystem::Get();
 	IOnlineSessionPtr Session = OnlineSubSystem->GetSessionInterface();
-
 	FOnlineSessionSettings settings;
 
 	settings.bIsDedicated = true;

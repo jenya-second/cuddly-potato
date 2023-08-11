@@ -31,6 +31,14 @@ void ADefaultPlayerState::CleanStats()
 	isDead = false;
 }
 
+void ADefaultPlayerState::ChangeTeam_Implementation(ADefaultTeam* NewTeam)
+{
+	AMatchGameMode* GM = Cast<AMatchGameMode>(GetWorld()->GetAuthGameMode());
+	if (GM != nullptr) {
+		GM->ChangeTeamByTeam(this, NewTeam);
+	}
+}
+
 void ADefaultPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

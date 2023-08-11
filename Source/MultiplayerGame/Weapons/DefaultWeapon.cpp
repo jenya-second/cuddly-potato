@@ -9,9 +9,14 @@ ADefaultWeapon::ADefaultWeapon()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bAlwaysRelevant = true;
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
+	RootComponent = CapsuleComponent;
+	CapsuleComponent->SetGenerateOverlapEvents(false);
 	WeaponBody = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
-	RootComponent = WeaponBody;
-	WeaponBody->SetCollisionProfileName("OverlapAll");
+	WeaponBody->SetupAttachment(RootComponent);
+	WeaponBody->SetCollisionProfileName("NoCollision");
+	WeaponBody->SetGenerateOverlapEvents(false);
 	WeaponBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -27,6 +32,11 @@ void ADefaultWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ADefaultWeapon::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Spawn bullet multicast"));
 }
 
 void ADefaultWeapon::PressShoot()
@@ -47,4 +57,10 @@ void ADefaultWeapon::PressAlternativeShoot()
 void ADefaultWeapon::UnPressAlternativeShoot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UnPressAlternativeShoot"));
+}
+
+void ADefaultWeapon::BotShoot()
+{
+	PressShoot();
+	UnPressShoot();
 }

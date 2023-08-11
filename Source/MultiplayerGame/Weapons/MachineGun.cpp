@@ -13,13 +13,7 @@ void AMachineGun::PressShoot()
 		if (CanFire && PlayerOwner->BulletManager->CountBullets[PlayerOwner->BulletManager->IndexBullet] > 0 && CurrentCharge >= 1)
 		{
 			const FTransform SpawnTransform = WeaponBody->GetSocketTransform("For_bullet");
-			ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActor(PlayerOwner->BulletManager->CurrentBullet, &SpawnTransform));
-			if (Actor != nullptr) {
-				Actor->BulletBody->SetPhysicsLinearVelocity(SpawnTransform.Rotator().Vector() *
-					Actor->Speed *
-					PlayerOwner->WeaponManager->CurrentWeapon->BulletSpeedScale);
-				Actor->SetOwner(PlayerOwner);
-			}
+			MulticastSpawnBullet(SpawnTransform);
 			CanFire = false;
 			PlayerOwner->BulletManager->CountBullets[PlayerOwner->BulletManager->IndexBullet]--;
 			CurrentCharge--;
@@ -31,14 +25,26 @@ void AMachineGun::PressShoot()
 			}
 		}
 	}
-	
-
-
 }
 
 void AMachineGun::PressAlternativeShoot()
 {
+	
+}
 
+void AMachineGun::MulticastSpawnBullet_Implementation(FTransform SpawnTransform)
+{
+	ADefaultCharacter* PlayerOwner = Cast<ADefaultCharacter>(GetOwner());
+	if (PlayerOwner != nullptr) {
+		ADefaultBullet* Actor = Cast<ADefaultBullet>(GetWorld()->SpawnActorDeferred<ADefaultBullet>(PlayerOwner->BulletManager->CurrentBullet, SpawnTransform, PlayerOwner));
+		if (Actor != nullptr) {
+			Actor->Damage *= BulletDamageScale;
+			Actor->LinearDamping = LinearDamp;
+			Actor->FinishSpawning(SpawnTransform);
+			Actor->ProjectileComponent->Velocity = SpawnTransform.Rotator().Vector() *
+				Actor->Speed * BulletSpeedScale;
+		}
+	}
 }
 
 void AMachineGun::SetCanFireTrue()
@@ -48,12 +54,12 @@ void AMachineGun::SetCanFireTrue()
 
 void AMachineGun::UnPressShoot()
 {
-
+	
 }
 
 void AMachineGun::UnPressAlternativeShoot()
 {
-
+	
 }
 
 void AMachineGun::BeginPlay()
@@ -69,3 +75,5 @@ void AMachineGun::Tick(float DeltaSeconds)
 		CurrentCharge += DeltaSeconds * ChargingSpeed;
 	}
 }
+
+
